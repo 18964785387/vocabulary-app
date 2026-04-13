@@ -74,7 +74,7 @@ class _LearnScreenState extends State<LearnScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('疯狂背单词'),
+        title: const Text('背单词'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
