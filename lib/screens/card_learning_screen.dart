@@ -223,7 +223,7 @@ class _CardLearningScreenState extends State<CardLearningScreen> {
                                   const SizedBox(height: 16),
                                   Container(
                                     padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(8)),
+                                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceVariant, borderRadius: BorderRadius.circular(8)),
                                     child: Text(word.example!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
                                   ),
                                 ],
@@ -251,7 +251,11 @@ class _CardLearningScreenState extends State<CardLearningScreen> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: FilledButton(onPressed: () => _submitAnswer(true), padding: const EdgeInsets.symmetric(vertical: 16), child: const Text('认识')),
+                      child: FilledButton(
+                        onPressed: () => _submitAnswer(true), 
+                        style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)), 
+                        child: const Text('认识')
+                      ),
                     ),
                   ],
                 ),

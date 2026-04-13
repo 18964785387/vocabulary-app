@@ -123,7 +123,8 @@ class ApiService {
   
   /// 获取词库等级列表
   static Future<List<Map<String, dynamic>>> getWordLevels() async {
-    return await get('/words/levels');
+    final response = await get('/words/levels');
+    return (response['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
   }
   
   /// 切换词库等级
@@ -133,22 +134,26 @@ class ApiService {
   
   /// 获取新词（学习用）
   static Future<List<Map<String, dynamic>>> getNewWords({int count = 10}) async {
-    return await get('/words/new?count=$count');
+    final response = await get('/words/new?count=$count');
+    return (response['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
   }
   
   /// 获取复习词
   static Future<List<Map<String, dynamic>>> getReviewWords() async {
-    return await get('/words/review');
+    final response = await get('/words/review');
+    return (response['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
   }
   
   /// 搜索单词
   static Future<List<Map<String, dynamic>>> searchWords(String keyword) async {
-    return await get('/words/search?keyword=$keyword');
+    final response = await get('/words/search?keyword=$keyword');
+    return (response['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
   }
   
   /// 获取生词本
   static Future<List<Map<String, dynamic>>> getWordBook() async {
-    return await get('/words/book');
+    final response = await get('/words/book');
+    return (response['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
   }
   
   /// 添加到生词本

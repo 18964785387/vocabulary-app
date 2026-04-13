@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: '学习',
           ),
           NavigationDestination(
-            icon: Icon(Icons.book_outline),
+            icon: Icon(Icons.book_outlined),
             selectedIcon: Icon(Icons.book),
             label: '生词本',
           ),

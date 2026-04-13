@@ -207,7 +207,7 @@ class _LearnScreenState extends State<LearnScreen> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(context).colorScheme.surfaceContainerHighest,
+                          : Theme.of(context).colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(12),
                       border: isSelected
                           ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
