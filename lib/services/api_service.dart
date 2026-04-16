@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // 后端API地址（部署后修改为实际地址）
-  static const String baseUrl = 'http://192.168.31.148:8000/api/v1';
+  // 后端API地址（外网访问）
+  static const String baseUrl = 'http://180.154.97.221:18000/api/v1';
   
   static String? _token;
   
