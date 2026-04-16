@@ -83,8 +83,7 @@ class UserProvider extends ChangeNotifier {
         phone: phone,
         grade: grade,
       );
-      _user = User.fromJson(result);
-      notifyListeners();
+      setUser(result);
       return true;
     } catch (e) {
       _error = e.toString().replaceAll('Exception: ', '');
@@ -97,8 +96,7 @@ class UserProvider extends ChangeNotifier {
   Future<void> refreshUser() async {
     try {
       final result = await ApiService.getUserInfo();
-      _user = User.fromJson(result);
-      notifyListeners();
+      setUser(result);
     } catch (e) {
       // 静默失败
     }

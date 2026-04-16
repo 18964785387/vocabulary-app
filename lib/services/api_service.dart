@@ -59,6 +59,16 @@ class ApiService {
     return _handleResponse(response);
   }
   
+  /// PUT请求
+  static Future<Map<String, dynamic>> put(String path, {Map<String, dynamic>? body}) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl$path'),
+      headers: await _headers(),
+      body: jsonEncode(body ?? {}),
+    );
+    return _handleResponse(response);
+  }
+  
   /// 处理响应
   static Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -103,7 +113,7 @@ class ApiService {
   
   /// 获取用户信息
   static Future<Map<String, dynamic>> getUserInfo() async {
-    return await get('/users/me');
+    return await get('/users/profile');
   }
   
   /// 更新用户信息
@@ -112,7 +122,7 @@ class ApiService {
     String? phone,
     int? grade,
   }) async {
-    return await post('/users/me', body: {
+    return await put('/users/profile', body: {
       if (username != null) 'username': username,
       if (phone != null) 'phone': phone,
       if (grade != null) 'grade': grade,
