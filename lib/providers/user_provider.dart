@@ -26,11 +26,14 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final result = await ApiService.login(
+      // 先登录获取token
+      await ApiService.login(
         username: username,
         password: password,
       );
-      _user = User.fromJson(result['user']);
+      // 再获取用户信息
+      final userData = await ApiService.getUserInfo();
+      _user = User.fromJson(userData);
       _isLoading = false;
       notifyListeners();
       return true;
