@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_service.dart';
-import 'sync_service.dart';
 
 class ApiService {
   // API地址配置（支持动态切换）
