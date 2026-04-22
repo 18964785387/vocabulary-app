@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../services/api_service.dart';
+import '../services/tts_service.dart';
 import '../models/models.dart';
 
 class WordBookScreen extends StatefulWidget {
@@ -13,11 +14,22 @@ class WordBookScreen extends StatefulWidget {
 class _WordBookScreenState extends State<WordBookScreen> {
   List<Word> _words = [];
   bool _isLoading = true;
+  final TtsService _ttsService = TtsService();
   
   @override
   void initState() {
     super.initState();
+    _initTts();
     _loadWords();
+  }
+  
+  Future<void> _initTts() async {
+    await _ttsService.init();
+  }
+  
+  @override
+  void dispose() {
+    super.dispose();
   }
   
   Future<void> _loadWords() async {
@@ -145,11 +157,28 @@ class _WordBookScreenState extends State<WordBookScreen> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           title: Row(
             children: [
-              Text(word.word, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              if (word.phonetic.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Text('/${word.phonetic}/', style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 14)),
-              ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(word.word, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.volume_up_outlined, size: 20),
+                          onPressed: () => _ttsService.speak(word.word),
+                          tooltip: '朗读',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    if (word.phonetic.isNotEmpty)
+                      Text('/${word.phonetic}/', style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 14)),
+                  ],
+                ),
+              ),
             ],
           ),
           subtitle: Text(word.meaning, maxLines: 2, overflow: TextOverflow.ellipsis),

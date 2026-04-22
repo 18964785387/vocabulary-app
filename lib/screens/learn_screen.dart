@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/database_service.dart';
+import '../services/sync_service.dart';
 import '../models/models.dart';
 import 'card_learning_screen.dart';
+import 'training_screen.dart';
 
 class LearnScreen extends StatefulWidget {
   const LearnScreen({super.key});
@@ -15,6 +18,7 @@ class _LearnScreenState extends State<LearnScreen> {
   List<WordLevel> _levels = [];
   int? _currentLevelId;
   bool _isLoading = true;
+  bool _isOffline = false;
   
   @override
   void initState() {
@@ -24,26 +28,107 @@ class _LearnScreenState extends State<LearnScreen> {
   
   Future<void> _loadData() async {
     try {
-      final summary = await ApiService.getLearningSummary();
-      final levels = await ApiService.getWordLevels();
+      // 先检查网络状态
+      final isOnline = await SyncService.instance.checkConnectivity() == ConnectionStatus.online;
       
-      setState(() {
-        _summary = summary;
-        _levels = levels.map((e) => WordLevel.fromJson(e)).toList();
-        _currentLevelId = summary['current_level_id'];
-        _isLoading = false;
-      });
+      if (isOnline) {
+        // 在线模式：从服务器获取
+        final summary = await ApiService.getLearningSummary();
+        final levels = await ApiService.getWordLevels();
+        
+        setState(() {
+          _summary = summary;
+          _levels = levels.map((e) => WordLevel.fromJson(e)).toList();
+          _currentLevelId = summary['current_level_id'] ?? 1;
+          _isLoading = false;
+          _isOffline = false;
+        });
+      } else {
+        // 离线模式：从本地获取
+        await _loadOfflineData();
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载失败: $e')),
-        );
+      // 网络请求失败，尝试离线
+      if (ApiService.offlineMode || e.toString().contains('OfflineException')) {
+        await _loadOfflineData();
+      } else {
+        setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('加载失败: $e')),
+          );
+        }
       }
     }
   }
   
+  /// 加载离线数据
+  Future<void> _loadOfflineData() async {
+    try {
+      // 检查是否有已下载的词库
+      final downloadedLevels = await DatabaseService.getDownloadedLevels();
+      
+      if (downloadedLevels.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('无网络且未下载词库，请先下载词库'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        setState(() {
+          _isLoading = false;
+          _isOffline = true;
+        });
+        return;
+      }
+      
+      // 获取本地统计
+      final localStats = await DatabaseService.getLocalStats();
+      final currentLevelId = await DatabaseService.getCurrentLevelId();
+      
+      // 转换已下载的等级为WordLevel对象
+      final levels = downloadedLevels.map((e) => WordLevel(
+        id: e['level_id'] as int? ?? 0,
+        name: e['level_name'] as String? ?? '',
+        wordCount: e['word_count'] as int? ?? 0,
+        description: '',
+      )).toList();
+      
+      setState(() {
+        _summary = {
+          'today_words': localStats['today_words'] as int? ?? 0,
+          'today_correct': localStats['today_correct'] as int? ?? 0,
+          'today_duration': 0,
+          'review_count': (localStats['today_words'] as int? ?? 0) > 0 ? localStats['today_words'] as int? ?? 0 : 10,
+        };
+        _levels = levels;
+        _currentLevelId = currentLevelId ?? (levels.isNotEmpty ? levels.first.id : 1);
+        _isLoading = false;
+        _isOffline = true;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _isOffline = true;
+      });
+    }
+  }
+  
   Future<void> _switchLevel(int levelId) async {
+    if (_isOffline) {
+      // 离线模式直接切换
+      await DatabaseService.setCurrentLevelId(levelId);
+      setState(() => _currentLevelId = levelId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('词库切换成功')),
+        );
+      }
+      return;
+    }
+    
     try {
       await ApiService.switchLevel(levelId);
       await _loadData();
@@ -65,7 +150,7 @@ class _LearnScreenState extends State<LearnScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CardLearningScreen(isReview: isReview),
+        builder: (_) => CardLearningScreen(isReview: isReview, isOffline: _isOffline),
       ),
     ).then((_) => _loadData());
   }
@@ -74,7 +159,33 @@ class _LearnScreenState extends State<LearnScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('背单词'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('背单词'),
+            if (_isOffline) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cloud_off, size: 14, color: Colors.orange),
+                    SizedBox(width: 4),
+                    Text(
+                      '离线',
+                      style: TextStyle(fontSize: 11, color: Colors.orange),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -84,32 +195,115 @@ class _LearnScreenState extends State<LearnScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 今日学习统计
-                    _buildTodayStats(),
-                    const SizedBox(height: 24),
-                    
-                    // 词库选择
-                    _buildLevelSelector(),
-                    const SizedBox(height: 24),
-                    
-                    // 学习入口
-                    _buildLearningButtons(),
-                    const SizedBox(height: 24),
-                    
-                    // 学习建议
-                    _buildTips(),
-                  ],
+          : _levels.isEmpty && _isOffline
+              ? _buildNoDataView()
+              : RefreshIndicator(
+                  onRefresh: _loadData,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 今日学习统计
+                        _buildTodayStats(),
+                        const SizedBox(height: 24),
+                        
+                        // 词库选择
+                        if (_levels.isNotEmpty) ...[
+                          _buildLevelSelector(),
+                          const SizedBox(height: 24),
+                        ],
+                        
+                        // 学习入口
+                        _buildLearningButtons(),
+                        const SizedBox(height: 24),
+                        
+                        // 学习建议
+                        if (!_isOffline) _buildTips(),
+                        
+                        // 离线提示
+                        if (_isOffline) _buildOfflineTip(),
+                      ],
+                    ),
+                  ),
                 ),
+    );
+  }
+  
+  /// 无数据视图
+  Widget _buildNoDataView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud_off,
+              size: 80,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              '暂无离线数据',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '请在设置页面下载词库后\n即可在无网络时学习',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
               ),
             ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () {
+                // 跳转到设置页面
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              icon: const Icon(Icons.download),
+              label: const Text('去下载词库'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// 离线模式提示
+  Widget _buildOfflineTip() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                '离线学习模式',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '• 学习记录将在联网后自动同步\n• 请注意及时同步以保存学习进度',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
     );
   }
   
@@ -271,7 +465,75 @@ class _LearnScreenState extends State<LearnScreen> {
             ),
           ],
         ),
+        
+        const SizedBox(height: 16),
+        
+        // 巩固训练入口
+        _buildTrainingCard(),
       ],
+    );
+  }
+  
+  void _startTraining() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const TrainingScreen(),
+      ),
+    ).then((_) => _loadData());
+  }
+  
+  Widget _buildTrainingCard() {
+    return Card(
+      color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3),
+      child: InkWell(
+        onTap: _startTraining,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.quiz_outlined,
+                  color: Theme.of(context).colorScheme.tertiary,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '巩固训练',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '选择题和拼写题强化训练',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
   
@@ -280,13 +542,12 @@ class _LearnScreenState extends State<LearnScreen> {
     required String title,
     required String subtitle,
     required Color color,
+    required VoidCallback onTap,
     bool enabled = true,
-    VoidCallback? onTap,
   }) {
     return Card(
-      color: enabled ? null : Theme.of(context).disabledColor.withOpacity(0.1),
       child: InkWell(
-        onTap: onTap,
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -295,24 +556,24 @@ class _LearnScreenState extends State<LearnScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(enabled ? 0.1 : 0.05),
+                  color: color.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: enabled ? color : Colors.grey, size: 32),
+                child: Icon(icon, color: color, size: 32),
               ),
               const SizedBox(height: 12),
               Text(
                 title,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: enabled ? null : Colors.grey,
+                  color: enabled ? null : Theme.of(context).colorScheme.outline,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: enabled ? null : Colors.grey,
+                  color: enabled ? null : Theme.of(context).colorScheme.outline,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -325,7 +586,7 @@ class _LearnScreenState extends State<LearnScreen> {
   
   Widget _buildTips() {
     return Card(
-      color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -333,17 +594,24 @@ class _LearnScreenState extends State<LearnScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.lightbulb_outline, color: Theme.of(context).colorScheme.secondary),
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
-                Text('学习小贴士', style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  '学习建议',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              '• 每天坚持学习，养成好习惯\n'
-              '• 及时复习，加深记忆\n'
-              '• 生词本多看多记，攻克难点',
-              style: Theme.of(context).textTheme.bodyMedium,
+              '• 建议每天学习20-30个新单词\n• 复习已学单词可加深记忆\n• 选择题训练有助于词汇巩固',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),

@@ -19,6 +19,12 @@ dependencies:
   audioplayers: ^5.2.1
   fl_chart: ^0.66.0
   cached_network_image: ^3.3.1
+  flutter_tts: ^4.0.2
+  # 离线功能依赖
+  sqflite: ^2.3.2
+  path: ^1.9.0
+  connectivity_plus: ^6.0.3
+  path_provider: ^2.1.2
 
 dev_dependencies:
   flutter_test:
