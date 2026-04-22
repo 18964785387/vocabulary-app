@@ -150,7 +150,7 @@ class _LearnScreenState extends State<LearnScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CardLearningScreen(isReview: isReview, isOffline: _isOffline),
+        builder: (_) => CardLearningScreenV2(isReview: isReview, isOffline: _isOffline),
       ),
     ).then((_) => _loadData());
   }

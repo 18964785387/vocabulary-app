@@ -161,11 +161,13 @@ class ApiService {
     required String username,
     required String password,
     String? phone,
+    int? grade,
   }) async {
     return await post('/auth/register', body: {
       'username': username,
       'password': password,
       if (phone != null) 'phone': phone,
+      if (grade != null) 'grade': grade,
     });
   }
   
