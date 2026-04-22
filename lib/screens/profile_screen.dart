@@ -24,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<Map<String, dynamic>> _downloadedLevels = [];
   int _pendingCount = 0;
   int _totalSize = 0;
+  int _localWordCount = 0;
   String? _syncMessage;
   
   final List<String> _gradeNames = ['一年级', '二年级', '三年级', '四年级', '五年级', '六年级', '初一', '初二', '初三', '高一', '高二', '高三'];
@@ -74,12 +75,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadSyncStatus() async {
     try {
       final info = await SyncService.instance.getSyncInfo();
+      final localWordCount = await DatabaseService.getTotalWordCount();
       if (mounted) {
         setState(() {
           _isOnline = info['isOnline'] as bool;
           _downloadedLevels = (info['downloadedLevels'] as List).cast<Map<String, dynamic>>();
           _pendingCount = info['pendingCount'] as int;
           _totalSize = info['totalDownloadSize'] as int;
+          _localWordCount = localWordCount;
         });
       }
     } catch (e) {
@@ -315,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
             
             // 存储信息
-            _buildDetailRow('本地单词数', '${await DatabaseService.getTotalWordCount()}'),
+            _buildDetailRow('本地单词数', '$_localWordCount'),
             _buildDetailRow('下载大小', _formatSize(_totalSize)),
             _buildDetailRow('待同步记录', '$_pendingCount'),
             

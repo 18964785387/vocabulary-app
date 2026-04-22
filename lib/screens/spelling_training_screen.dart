@@ -158,7 +158,7 @@ class _SpellingTrainingScreenState extends State<SpellingTrainingScreen> {
     }
     
     // 提交答案到后端
-    TrainingApiService.submitAnswer(
+    TrainingApi.submitAnswer(
       wordId: question.wordId,
       userAnswer: _userAnswer,
       isCorrect: isCorrect,
@@ -198,7 +198,7 @@ class _SpellingTrainingScreenState extends State<SpellingTrainingScreen> {
     // 添加错题到生词本
     if (_wrongWordIds.isNotEmpty) {
       try {
-        await TrainingApiService.addWrongWordsToBook(_wrongWordIds);
+        await TrainingApi.addWrongWordsToBook(_wrongWordIds);
       } catch (e) {
         debugPrint('添加错题到生词本失败: $e');
       }
@@ -206,7 +206,7 @@ class _SpellingTrainingScreenState extends State<SpellingTrainingScreen> {
     
     // 提交训练结果
     try {
-      await TrainingApiService.submitTrainingResult(
+      await TrainingApi.submitTrainingResult(
         totalQuestions: _questions.length,
         correctCount: _results.where((r) => r.isCorrect).length,
         duration: _totalDuration,

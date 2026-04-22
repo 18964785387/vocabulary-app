@@ -542,7 +542,7 @@ class _LearnScreenState extends State<LearnScreen> {
     required String title,
     required String subtitle,
     required Color color,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
     bool enabled = true,
   }) {
     return Card(

@@ -30,8 +30,8 @@ class TtsService {
   Future<void> init() async {
     if (_isInitialized) return;
     
-    // 设置 Android 选项
-    await _flutterTts.setAndroidLanguage('en-US');
+    // 设置语言和语速
+    await _flutterTts.setLanguage('en-US');
     await _flutterTts.awaitSpeakCompletion(true);
     
     // 加载保存的设置

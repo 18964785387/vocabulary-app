@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'database_service.dart';
 import 'api_service.dart';
 
@@ -380,7 +381,7 @@ class SyncService {
   /// 更新同步状态
   Future<void> _updateSyncStatus() async {
     final pendingCount = await DatabaseService.getPendingRecordCount();
-    final totalSynced = await DatabaseService.getTotalSyncedCount();
+    final totalSynced = await getTotalSyncedCount();
     
     await DatabaseService.updateSyncStatus(
       lastSyncTime: DateTime.now().toIso8601String(),
