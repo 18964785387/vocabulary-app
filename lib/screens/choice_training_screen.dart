@@ -382,7 +382,7 @@ class _ChoiceTrainingScreenState extends State<ChoiceTrainingScreen> {
         color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -435,7 +435,7 @@ class _ChoiceTrainingScreenState extends State<ChoiceTrainingScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+            color: colorScheme.primaryContainer.withOpacity(0.3),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -502,7 +502,7 @@ class _ChoiceTrainingScreenState extends State<ChoiceTrainingScreen> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -540,12 +540,12 @@ class _ChoiceTrainingScreenState extends State<ChoiceTrainingScreen> {
     
     if (_hasAnswered) {
       if (isCorrect) {
-        backgroundColor = Colors.green.withValues(alpha: 0.1);
+        backgroundColor = Colors.green.withOpacity(0.1);
         borderColor = Colors.green;
         textColor = Colors.green.shade700;
         icon = Icons.check_circle;
       } else if (_selectedAnswerIndex == index) {
-        backgroundColor = Colors.red.withValues(alpha: 0.1);
+        backgroundColor = Colors.red.withOpacity(0.1);
         borderColor = Colors.red;
         textColor = Colors.red.shade700;
         icon = Icons.cancel;

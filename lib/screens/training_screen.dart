@@ -226,7 +226,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                       '题',
                       style: TextStyle(
                         fontSize: 14,
-                        color: isSelected ? colorScheme.onPrimary.withValues(alpha: 0.8) : colorScheme.onSurfaceVariant,
+                        color: isSelected ? colorScheme.onPrimary.withOpacity(0.8) : colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -262,7 +262,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

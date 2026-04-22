@@ -73,13 +73,13 @@ class TrainingResultScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            circleColor.withValues(alpha: 0.1),
-            circleColor.withValues(alpha: 0.05),
+            circleColor.withOpacity(0.1),
+            circleColor.withOpacity(0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: circleColor.withValues(alpha: 0.3),
+          color: circleColor.withOpacity(0.3),
           width: 2,
         ),
       ),
@@ -98,7 +98,7 @@ class TrainingResultScreen extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: result.accuracy / 100,
                     strokeWidth: 12,
-                    backgroundColor: circleColor.withValues(alpha: 0.2),
+                    backgroundColor: circleColor.withOpacity(0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(circleColor),
                   ),
                 ),
@@ -156,7 +156,7 @@ class TrainingResultScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -259,7 +259,7 @@ class TrainingResultScreen extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 20),
@@ -293,7 +293,7 @@ class TrainingResultScreen extends StatelessWidget {
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -304,7 +304,7 @@ class TrainingResultScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
+                  color: Colors.red.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -343,7 +343,7 @@ class TrainingResultScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+        border: Border.all(color: Colors.red.withOpacity(0.3)),
       ),
       child: Row(
         children: [

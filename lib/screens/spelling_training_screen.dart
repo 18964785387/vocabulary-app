@@ -333,7 +333,7 @@ class _SpellingTrainingScreenState extends State<SpellingTrainingScreen> {
         color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -403,7 +403,7 @@ class _SpellingTrainingScreenState extends State<SpellingTrainingScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+            color: colorScheme.primaryContainer.withOpacity(0.3),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -435,7 +435,7 @@ class _SpellingTrainingScreenState extends State<SpellingTrainingScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -493,8 +493,8 @@ class _SpellingTrainingScreenState extends State<SpellingTrainingScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _isCorrect 
-            ? Colors.green.withValues(alpha: 0.1)
-            : Colors.red.withValues(alpha: 0.1),
+            ? Colors.green.withOpacity(0.1)
+            : Colors.red.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _isCorrect ? Colors.green : Colors.red,
@@ -558,7 +558,7 @@ class _SpellingTrainingScreenState extends State<SpellingTrainingScreen> {
         color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
