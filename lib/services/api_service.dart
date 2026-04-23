@@ -7,8 +7,8 @@ import 'database_service.dart';
 
 class ApiService {
   // API地址配置（支持动态切换）
-  static String _baseUrl = 'http://180.154.97.221:18000/api/v1'; // 默认外网地址
-  static const String _externalUrl = 'http://180.154.97.221:18000/api/v1'; // 外网地址
+  static String _baseUrl = 'http://58.38.17.157:18000/api/v1'; // 默认外网地址
+  static const String _externalUrl = 'http://58.38.17.157:18000/api/v1'; // 外网地址
   static const String _internalUrl = 'http://192.168.7.108:8000/api/v1'; // 内网地址
   
   static String? _token;
