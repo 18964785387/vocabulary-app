@@ -268,7 +268,7 @@ class SyncService {
               isCorrect: record['is_correct'] == 1,
               duration: record['duration'] as int,
             );
-            syncedLocalIds.add(record['local_id'] as int);
+            syncedLocalIds.add(record['id'] as int);
           } catch (e) {
             // 单条失败不影响其他记录
             continue;

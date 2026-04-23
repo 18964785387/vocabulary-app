@@ -374,7 +374,7 @@ class ApiService {
         ).toList();
         
         if (matchingRecord.isNotEmpty) {
-          await DatabaseService.markRecordsSynced([matchingRecord.first['local_id'] as int]);
+          await DatabaseService.markRecordsSynced([matchingRecord.first['id'] as int]);
         }
         
         return result;
@@ -448,7 +448,7 @@ class ApiService {
           'is_correct': record['is_correct'] == 1,
           'duration': record['duration'],
         });
-        await DatabaseService.markRecordsSynced([record['local_id'] as int]);
+        await DatabaseService.markRecordsSynced([record['id'] as int]);
       } catch (e) {
         // 同步失败，下次继续
         break;

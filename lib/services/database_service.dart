@@ -6,7 +6,7 @@ import '../models/models.dart';
 class DatabaseService {
   static Database? _database;
   static const String _dbName = 'vocabulary_app.db';
-  static const int _dbVersion = 1;
+  static const int _dbVersion = 2;
 
   /// 获取数据库实例
   static Future<Database> get database async {
@@ -55,8 +55,7 @@ class DatabaseService {
         is_correct INTEGER NOT NULL,
         duration INTEGER NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        synced INTEGER DEFAULT 0,
-        local_id INTEGER PRIMARY KEY AUTOINCREMENT
+        synced INTEGER DEFAULT 0
       )
     ''');
 
@@ -99,7 +98,20 @@ class DatabaseService {
 
   /// 数据库升级
   static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // 未来版本升级逻辑
+    if (oldVersion < 2) {
+      // 修复 learning_records 表结构（移除重复主键）
+      await db.execute('DROP TABLE IF EXISTS learning_records');
+      await db.execute('''
+        CREATE TABLE learning_records (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          word_id INTEGER NOT NULL,
+          is_correct INTEGER NOT NULL,
+          duration INTEGER NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          synced INTEGER DEFAULT 0
+        )
+      ''');
+    }
   }
 
   // ==================== 单词操作 ====================
@@ -249,7 +261,7 @@ class DatabaseService {
     final db = await database;
     final placeholders = List.filled(localIds.length, '?').join(',');
     await db.rawUpdate(
-      'UPDATE learning_records SET synced = 1 WHERE local_id IN ($placeholders)',
+      'UPDATE learning_records SET synced = 1 WHERE id IN ($placeholders)',
       localIds,
     );
   }
